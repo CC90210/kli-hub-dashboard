@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  name           String?
+  hashedPassword String?
+  role           String    @default("USER") // Simple string for SQLite, mapped to Enum in app logic if needed
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  
+  conversations  Conversation[]
+  documents      Document[]
+  queries        Query[]
+}
+
+model Conversation {
+  id        String    @id @default(cuid())
+  title     String
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  content        String
+  role           String       // USER, ASSISTANT, SYSTEM
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sources        String?      // Stored as JSON string for SQLite compatibility
+  createdAt      DateTime     @default(now())
+}
+
+model Document {
+  id           String       @id @default(cuid())
+  name         String
+  type         String
+  category     String
+  size         Int
+  mimeType     String
+  path         String
+  metadata     String?      // JSON string
+  status       String       @default("PROCESSING")
+  uploadedById String
+  uploadedBy   User         @relation(fields: [uploadedById], references: [id])
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model Query {
+  id           String   @id @default(cuid())
+  query        String
+  response     String?
+  sources      String?  // JSON string
+  responseTime Int?
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  createdAt    DateTime @default(now())
+}
+
+model Analytics {
+  id        String   @id @default(cuid())
+  event     String
+  data      String   // JSON string
+  createdAt DateTime @default(now())
+}
