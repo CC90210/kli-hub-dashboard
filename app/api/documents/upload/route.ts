@@ -68,7 +68,6 @@ export async function POST(req: NextRequest) {
         const document = await prisma.document.create({
             data: {
                 name: file.name,
-                type: docType,
                 category,
                 size: file.size,
                 mimeType: file.type || "application/octet-stream",
