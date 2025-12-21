@@ -3,7 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials"
 
 // Only import Prisma if DATABASE_URL exists to prevent crash on import
 const getPrismaClient = async () => {
-    if (!process.env.DATABASE_URL) {
+    if (!process.env.DATABASE_URL && !process.env.POSTGRES_PRISMA_URL) {
         return null
     }
     // Dynamic import to avoid build-time errors if module is missing
@@ -30,7 +30,7 @@ export const authOptions: NextAuthOptions = {
                 }
 
                 // Check if database is available
-                if (!process.env.DATABASE_URL) {
+                if (!process.env.DATABASE_URL && !process.env.POSTGRES_PRISMA_URL) {
                     // TEMPORARY: Allow a test user when no database
                     if (credentials.email === "admin@kli.com" && credentials.password === "admin123") {
                         return {

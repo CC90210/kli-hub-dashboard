@@ -1,9 +1,10 @@
+```typescript
 import { NextRequest, NextResponse } from "next/server"
 
 export async function POST(req: NextRequest) {
     try {
         // Check if database is configured
-        if (!process.env.DATABASE_URL) {
+        if (!process.env.DATABASE_URL && !process.env.POSTGRES_PRISMA_URL) {
             return NextResponse.json(
                 { error: "Database not configured. Please contact administrator." },
                 { status: 503 }
