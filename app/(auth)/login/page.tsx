@@ -1,13 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Loader2, Mail, Lock, Sparkles, Eye, EyeOff, CheckCircle2 } from "lucide-react"
 
-export default function LoginPage() {
+function LoginForm() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [email, setEmail] = useState("")
@@ -56,6 +56,108 @@ export default function LoginPage() {
     }
 
     return (
+        <div className="bg-[#0D1321]/90 backdrop-blur-xl rounded-2xl p-8 border border-white/10 shadow-2xl">
+            {/* Success Message */}
+            {showSuccess && (
+                <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm flex items-center gap-3"
+                >
+                    <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
+                    Account created successfully! Please sign in.
+                </motion.div>
+            )}
+
+            {/* Error Message */}
+            {error && (
+                <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm"
+                >
+                    {error}
+                </motion.div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+                {/* Email Field */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Email
+                    </label>
+                    <div className="relative">
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            placeholder="you@company.com"
+                            className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-600 focus:border-[#0066FF] focus:outline-none focus:ring-2 focus:ring-[#0066FF]/20 transition-all"
+                        />
+                    </div>
+                </div>
+
+                {/* Password Field */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Password
+                    </label>
+                    <div className="relative">
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            placeholder="Enter your password"
+                            className="w-full pl-12 pr-12 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-600 focus:border-[#0066FF] focus:outline-none focus:ring-2 focus:ring-[#0066FF]/20 transition-all"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                        >
+                            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Submit Button */}
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-4 rounded-xl bg-gradient-to-r from-[#0066FF] via-[#00D4FF] to-[#00F5A0] text-white font-semibold hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#0066FF]/25"
+                >
+                    {loading ? (
+                        <>
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                            Signing in...
+                        </>
+                    ) : (
+                        "Sign In"
+                    )}
+                </button>
+            </form>
+
+            {/* Sign Up Link */}
+            <p className="mt-6 text-center text-gray-400">
+                Don't have an account?{" "}
+                <Link
+                    href="/signup"
+                    className="text-[#00D4FF] hover:text-[#00F5A0] font-medium transition-colors"
+                >
+                    Create one
+                </Link>
+            </p>
+        </div>
+    )
+}
+
+export default function LoginPage() {
+    return (
         <div className="min-h-screen flex items-center justify-center bg-[#060912] p-4">
             {/* Background Effects */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -85,104 +187,16 @@ export default function LoginPage() {
                     <p className="text-gray-400 mt-2">Sign in to your account</p>
                 </div>
 
-                {/* Form Card */}
-                <div className="bg-[#0D1321]/90 backdrop-blur-xl rounded-2xl p-8 border border-white/10 shadow-2xl">
-                    {/* Success Message */}
-                    {showSuccess && (
-                        <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0 }}
-                            className="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm flex items-center gap-3"
-                        >
-                            <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
-                            Account created successfully! Please sign in.
-                        </motion.div>
-                    )}
-
-                    {/* Error Message */}
-                    {error && (
-                        <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm"
-                        >
-                            {error}
-                        </motion.div>
-                    )}
-
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                        {/* Email Field */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Email
-                            </label>
-                            <div className="relative">
-                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                    placeholder="you@company.com"
-                                    className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-600 focus:border-[#0066FF] focus:outline-none focus:ring-2 focus:ring-[#0066FF]/20 transition-all"
-                                />
-                            </div>
+                {/* Form Card with Suspense */}
+                <Suspense
+                    fallback={
+                        <div className="bg-[#0D1321]/90 backdrop-blur-xl rounded-2xl p-8 border border-white/10 shadow-2xl h-[400px] flex items-center justify-center">
+                            <Loader2 className="h-8 w-8 animate-spin text-[#0066FF]" />
                         </div>
-
-                        {/* Password Field */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Password
-                            </label>
-                            <div className="relative">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
-                                <input
-                                    type={showPassword ? "text" : "password"}
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                    placeholder="Enter your password"
-                                    className="w-full pl-12 pr-12 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-600 focus:border-[#0066FF] focus:outline-none focus:ring-2 focus:ring-[#0066FF]/20 transition-all"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
-                                >
-                                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Submit Button */}
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full py-4 rounded-xl bg-gradient-to-r from-[#0066FF] via-[#00D4FF] to-[#00F5A0] text-white font-semibold hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#0066FF]/25"
-                        >
-                            {loading ? (
-                                <>
-                                    <Loader2 className="h-5 w-5 animate-spin" />
-                                    Signing in...
-                                </>
-                            ) : (
-                                "Sign In"
-                            )}
-                        </button>
-                    </form>
-
-                    {/* Sign Up Link */}
-                    <p className="mt-6 text-center text-gray-400">
-                        Don't have an account?{" "}
-                        <Link
-                            href="/signup"
-                            className="text-[#00D4FF] hover:text-[#00F5A0] font-medium transition-colors"
-                        >
-                            Create one
-                        </Link>
-                    </p>
-                </div>
+                    }
+                >
+                    <LoginForm />
+                </Suspense>
             </motion.div>
         </div>
     )
