@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json()
-        const { name, email, password } = body
+        const { name, email, password, jobTitle } = body
 
         if (!email || !password) {
             return NextResponse.json(
@@ -65,6 +65,7 @@ export async function POST(req: NextRequest) {
             data: {
                 email: normalizedEmail,
                 name: name?.trim() || null,
+                jobTitle: jobTitle?.trim() || null,
                 hashedPassword,
                 role: "USER"
             }

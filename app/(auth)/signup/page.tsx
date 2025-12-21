@@ -23,6 +23,7 @@ export default function SignUpPage() {
 
     // Form state
     const [name, setName] = useState("")
+    const [jobTitle, setJobTitle] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
@@ -69,13 +70,15 @@ export default function SignUpPage() {
 
         try {
             // Call signup API
+            // Call signup API
             const response = await fetch("/api/auth/signup", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     name: name.trim(),
                     email: email.trim(),
-                    password
+                    password,
+                    jobTitle: jobTitle.trim()
                 })
             })
 
@@ -220,6 +223,8 @@ export default function SignUpPage() {
                                 <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
                                 <input
                                     type="text"
+                                    value={jobTitle}
+                                    onChange={(e) => setJobTitle(e.target.value)}
                                     placeholder="e.g. Operations Manager"
                                     className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-600 focus:border-[#8B5CF6] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]/20 transition-all disabled:opacity-50"
                                 />
