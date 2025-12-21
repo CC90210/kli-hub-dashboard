@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { signIn } from "next-auth/react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Loader2, Mail, Lock, User, Sparkles, Eye, EyeOff, ArrowRight, Check } from "lucide-react"
@@ -55,8 +56,23 @@ export default function SignUpPage() {
                 return
             }
 
-            // Redirect to login with success message
-            router.push("/login?registered=true")
+            // Auto-login
+            setLoading(true) // Keep loading state
+
+            const result = await signIn("credentials", {
+                email: email.toLowerCase().trim(),
+                password,
+                redirect: false
+            })
+
+            if (result?.error) {
+                // If auto-login fails, fallback to login page
+                router.push("/login?registered=true")
+            } else {
+                // Success - go to dashboard
+                router.refresh()
+                router.push("/dashboard")
+            }
 
         } catch (err) {
             setError("Something went wrong. Please try again.")
