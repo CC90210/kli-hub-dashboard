@@ -125,27 +125,17 @@ function LoginForm() {
                 </Button>
             </form>
 
-            <div className="mt-6 p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-                <p className="text-xs text-slate-500 mb-2 uppercase tracking-wider font-semibold">Demo Credentials</p>
-                <div className="space-y-2 text-xs font-mono">
-                    <div className="flex justify-between">
-                        <span className="text-slate-400">Admin:</span>
-                        <span className="text-blue-400">admin@kli.com</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-slate-400">Pass:</span>
-                        <span className="text-slate-300">KLI-Admin-2024!</span>
-                    </div>
-                    <div className="h-px bg-slate-700/50 my-2" />
-                    <div className="flex justify-between">
-                        <span className="text-slate-400">Bypass:</span>
-                        <span className="text-blue-400">demo@kli.com</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-slate-400">Pass:</span>
-                        <span className="text-slate-300">demo123</span>
-                    </div>
-                </div>
+            <div className="mt-6 p-4 rounded-lg bg-emerald-900/20 border border-emerald-500/30">
+                <p className="text-xs text-emerald-400 mb-2 uppercase tracking-wider font-semibold flex items-center gap-2">
+                    <Sparkles className="h-3 w-3" /> Open Access Enabled
+                </p>
+                <p className="text-xs text-slate-400">
+                    Enter <strong>ANY</strong> email and password to sign in.
+                    <br />
+                    <span className="opacity-50 mt-1 block">
+                        (Database connection is optional for this demo mode)
+                    </span>
+                </p>
             </div>
         </div>
     )
