@@ -5,6 +5,18 @@ import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
 export const authOptions: NextAuthOptions = {
+    debug: true, // Enable debug mode for production troubleshooting
+    logger: {
+        error(code, metadata) {
+            console.error("❌ NextAuth Error:", code, metadata)
+        },
+        warn(code) {
+            console.warn("⚠️ NextAuth Warning:", code)
+        },
+        debug(code, metadata) {
+            console.log("🔍 NextAuth Debug:", code, metadata)
+        }
+    },
     adapter: PrismaAdapter(prisma) as any,
     providers: [
         CredentialsProvider({

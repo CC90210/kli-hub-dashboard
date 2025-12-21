@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "Enterprise RAG Dashboard for Merchant, Supplier & Customer Intelligence",
 };
 
+import { Providers } from "./providers";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -27,7 +29,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} antialiased bg-[#0A0F1E] text-slate-200`}
       >
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );
