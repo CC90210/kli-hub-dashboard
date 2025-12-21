@@ -1,17 +1,12 @@
-import { withAuth } from "next-auth/middleware"
+// middleware.ts
+import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 
-export default withAuth({
-    callbacks: {
-        authorized: ({ token }) => !!token,
-    },
-})
+export function middleware(request: NextRequest) {
+    // Just pass through - let pages handle their own auth
+    return NextResponse.next()
+}
 
 export const config = {
-    matcher: [
-        "/dashboard/:path*",
-        "/settings/:path*",
-        "/api/chat/:path*",
-        "/api/documents/:path*",
-        "/api/user/:path*",
-    ]
+    matcher: [] // Match nothing - effectively disabled
 }
