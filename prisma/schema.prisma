@@ -8,17 +8,53 @@ datasource db {
 }
 
 model User {
-  id             String    @id @default(cuid())
-  email          String    @unique
-  name           String?
-  hashedPassword String?
-  role           String    @default("USER") // Simple string for SQLite, mapped to Enum in app logic if needed
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id              String    @id @default(cuid())
+  email           String    @unique
+  name            String?
+  hashedPassword  String
+  role            Role      @default(USER)
   
-  conversations  Conversation[]
-  documents      Document[]
-  queries        Query[]
+  // Notification preferences
+  emailNotifications      Boolean @default(true)
+  documentAlerts          Boolean @default(true)
+  weeklyReport            Boolean @default(false)
+  
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  documents       Document[]
+  conversations   Conversation[]
+  queries         Query[]
+}
+
+enum Role {
+  USER
+  ADMIN
+  OWNER
+}
+
+model Document {
+  id            String       @id @default(cuid())
+  name          String
+  category      String       // "retailer", "customer", "supplier"
+  size          Int
+  mimeType      String
+  path          String
+  status        DocStatus    @default(PROCESSING)
+  
+  uploadedById  String
+  uploadedBy    User         @relation(fields: [uploadedById], references: [id])
+  
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+enum DocStatus {
+  PROCESSING
+  INDEXED
+  FAILED
 }
 
 model Conversation {
@@ -33,44 +69,25 @@ model Conversation {
 
 model Message {
   id             String       @id @default(cuid())
-  content        String
-  role           String       // USER, ASSISTANT, SYSTEM
+  content        String       @db.Text
+  role           MessageRole
+  sources        Json?
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  sources        String?      // Stored as JSON string for SQLite compatibility
   createdAt      DateTime     @default(now())
 }
 
-model Document {
-  id           String       @id @default(cuid())
-  name         String
-  type         String
-  category     String
-  size         Int
-  mimeType     String
-  path         String
-  metadata     String?      // JSON string
-  status       String       @default("PROCESSING")
-  uploadedById String
-  uploadedBy   User         @relation(fields: [uploadedById], references: [id])
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+enum MessageRole {
+  USER
+  ASSISTANT
 }
 
 model Query {
   id           String   @id @default(cuid())
-  query        String
-  response     String?
-  sources      String?  // JSON string
+  query        String   @db.Text
+  response     String?  @db.Text
   responseTime Int?
   userId       String
   user         User     @relation(fields: [userId], references: [id])
   createdAt    DateTime @default(now())
-}
-
-model Analytics {
-  id        String   @id @default(cuid())
-  event     String
-  data      String   // JSON string
-  createdAt DateTime @default(now())
 }

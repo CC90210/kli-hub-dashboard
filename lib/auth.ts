@@ -1,25 +1,9 @@
-import NextAuth, { NextAuthOptions } from "next-auth"
+import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import { prisma } from "@/lib/prisma"
+import { prisma } from "./prisma"
 import bcrypt from "bcryptjs"
 
 export const authOptions: NextAuthOptions = {
-    debug: true, // Enable debug mode for production troubleshooting
-    logger: {
-        error(code, metadata) {
-            console.error("❌ NextAuth Error:", code, metadata)
-        },
-        warn(code) {
-            console.warn("⚠️ NextAuth Warning:", code)
-        },
-        debug(code, metadata) {
-            console.log("🔍 NextAuth Debug:", code, metadata)
-        }
-    },
-    // CRITICAL: Fallback secret to prevent "Configuration" error if env var is missing
-    secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-demo-only",
-    adapter: PrismaAdapter(prisma) as any,
     providers: [
         CredentialsProvider({
             name: "credentials",
@@ -28,24 +12,31 @@ export const authOptions: NextAuthOptions = {
                 password: { label: "Password", type: "password" }
             },
             async authorize(credentials) {
-                // ------------------------------------------------------------------
-                // RESCUE MODE: INSTANT LOGIN / NO DATABASE
-                // ------------------------------------------------------------------
-                // The user reported "buffering" which means the DB connection is hanging.
-                // We are REMOVING the DB dependency entirely to guarantee access.
-
                 if (!credentials?.email || !credentials?.password) {
-                    throw new Error("Please enter an email and password")
+                    throw new Error("Email and password are required")
                 }
 
-                console.log("🚀 FAST AUTH: Authorizing " + credentials.email);
+                // Find user in database
+                const user = await prisma.user.findUnique({
+                    where: { email: credentials.email.toLowerCase().trim() }
+                })
 
-                // Return a valid user session IMMEDIATELY.
+                if (!user) {
+                    throw new Error("No account found with this email")
+                }
+
+                // Verify password
+                const isValid = await bcrypt.compare(credentials.password, user.hashedPassword)
+
+                if (!isValid) {
+                    throw new Error("Invalid password")
+                }
+
                 return {
-                    id: "rescue-" + Date.now(),
-                    email: credentials.email,
-                    name: credentials.email.split("@")[0],
-                    role: "ADMIN" // Grant full access
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                    role: user.role
                 }
             }
         })
@@ -59,19 +50,28 @@ export const authOptions: NextAuthOptions = {
         error: "/login"
     },
     callbacks: {
-        async jwt({ token, user }) {
+        async jwt({ token, user, trigger, session }) {
             if (user) {
-                token.role = user.role
                 token.id = user.id
+                token.role = user.role
+                token.name = user.name
             }
+
+            // Handle session updates (when user updates their profile)
+            if (trigger === "update" && session) {
+                token.name = session.name
+            }
+
             return token
         },
         async session({ session, token }) {
-            if (token && session.user) {
-                (session.user as any).role = token.role as string
-                (session.user as any).id = token.id as string
+            if (session.user) {
+                session.user.id = token.id as string
+                session.user.role = token.role as string
+                session.user.name = token.name as string
             }
             return session
         }
-    }
+    },
+    secret: process.env.NEXTAUTH_SECRET
 }

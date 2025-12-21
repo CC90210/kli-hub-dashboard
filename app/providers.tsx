@@ -5,7 +5,10 @@ import { ReactNode } from "react"
 
 export function Providers({ children }: { children: ReactNode }) {
     return (
-        <SessionProvider refetchInterval={5 * 60} refetchOnWindowFocus={true}>
+        <SessionProvider
+            refetchInterval={5 * 60}
+            refetchOnWindowFocus={true}
+        >
             {children}
         </SessionProvider>
     )
