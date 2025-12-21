@@ -66,12 +66,14 @@ function LoginForm() {
 
             if (result?.error) {
                 // Show user-friendly error messages
-                if (result.error.includes("No account found")) {
+                // Show user-friendly error messages
+                if (result.error === "UserNotFound" || result.error.includes("UserNotFound")) {
                     setError("No account found with this email. Please sign up first.")
-                } else if (result.error.includes("Incorrect password")) {
+                } else if (result.error === "PasswordMismatch" || result.error.includes("PasswordMismatch")) {
                     setError("Incorrect password. Please try again.")
                 } else {
-                    setError("Invalid email or password")
+                    // Debugging: Show the actual error message
+                    setError(`Login Failed: ${result.error}`)
                 }
                 setLoading(false)
                 return
