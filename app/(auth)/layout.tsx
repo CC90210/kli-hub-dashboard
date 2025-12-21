@@ -7,21 +7,12 @@ export default async function AuthLayout({
 }: {
     children: React.ReactNode
 }) {
-    try {
-        const session = await getServerSession(authOptions)
+    // If user is already logged in, redirect to dashboard
+    const session = await getServerSession(authOptions)
 
-        // If user is already logged in, redirect to dashboard
-        if (session) {
-            redirect("/dashboard")
-        }
-    } catch (error) {
-        console.error("Auth layout check failed:", error)
-        // Continue to render login page if auth check fails
+    if (session) {
+        redirect("/dashboard")
     }
 
-    return (
-        <div className="min-h-screen bg-[#060912]">
-            {children}
-        </div>
-    )
+    return <>{children}</>
 }
