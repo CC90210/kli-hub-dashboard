@@ -233,7 +233,7 @@ function LoginForm() {
                         Don't have an account?{" "}
                         <button
                             type="button"
-                            onClick={() => router.push("/signup")}
+                            onClick={() => window.location.href = "/signup"}
                             className="text-[#00D4FF] hover:text-[#00F5A0] font-medium transition-colors hover:underline"
                         >
                             Create New Account

@@ -203,9 +203,24 @@ export default function SignUpPage() {
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="you@company.com"
+                                    placeholder="employee@company.com"
                                     required
                                     disabled={loading}
+                                    className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-600 focus:border-[#8B5CF6] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]/20 transition-all disabled:opacity-50"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Job Title Field (New) */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Job Title / Role
+                            </label>
+                            <div className="relative">
+                                <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
+                                <input
+                                    type="text"
+                                    placeholder="e.g. Operations Manager"
                                     className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-600 focus:border-[#8B5CF6] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]/20 transition-all disabled:opacity-50"
                                 />
                             </div>
@@ -261,8 +276,8 @@ export default function SignUpPage() {
                             {passwordChecks.map((check, i) => (
                                 <div key={i} className="flex items-center gap-2">
                                     <div className={`h-5 w-5 rounded-full flex items-center justify-center transition-colors ${check.valid
-                                            ? "bg-emerald-500"
-                                            : "bg-white/10"
+                                        ? "bg-emerald-500"
+                                        : "bg-white/10"
                                         }`}>
                                         {check.valid && <Check className="h-3 w-3 text-white" />}
                                     </div>
