@@ -74,6 +74,7 @@ export async function POST(req: NextRequest) {
             data: {
                 content: ragResult.response || ragResult.text || "I couldn't process that request.",
                 role: "ASSISTANT",
+                conversationId: conversation.id,
                 sources: ragResult.sources || undefined
             }
         })
