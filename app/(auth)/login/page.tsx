@@ -44,8 +44,10 @@ function LoginForm() {
             }
 
             if (result?.ok) {
-                router.push(callbackUrl)
-                router.refresh()
+                // FORCE HARD NAVIGATION
+                // This resolves "buffering" issues by forcing a clean browser state reload
+                // ensuring cookies and session/providers are fresh.
+                window.location.href = callbackUrl
             }
         } catch (error) {
             console.error("Login exception:", error)

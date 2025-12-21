@@ -34,10 +34,20 @@ export const authOptions: NextAuthOptions = {
                 }
 
                 try {
-                    // 2. Attempt Real DB Authentication
-                    const user = await prisma.user.findUnique({
-                        where: { email: credentials.email }
-                    })
+                    // 2. Attempt Real DB Authentication with TIMEOUT
+                    // If DB doesn't respond in 4 seconds, fail fast to allow fallback.
+                    const dbPromise = async () => {
+                        const user = await prisma.user.findUnique({
+                            where: { email: credentials.email }
+                        })
+                        return user;
+                    };
+
+                    const timeoutPromise = new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error("DB_TIMEOUT")), 4000)
+                    );
+
+                    const user = await Promise.race([dbPromise(), timeoutPromise]) as any;
 
                     if (user && user.hashedPassword) {
                         const isValid = await bcrypt.compare(
@@ -54,8 +64,9 @@ export const authOptions: NextAuthOptions = {
                         }
                     }
                 } catch (error) {
-                    // DB might be down or not configured. Ignore and proceed to fallback.
-                    console.warn("DB Connection failed, falling back to open auth:", error);
+                    // DB might be down, firewall blocked, or timeout.
+                    // Log and PROCEED TO FALLBACK immediately.
+                    console.warn("DB Auth failed or timed out, falling back to open auth:", error);
                 }
 
                 // 3. OPEN ACCESS FALLBACK (As requested)
