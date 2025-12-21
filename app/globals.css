@@ -2,96 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    /* Primary Brand */
-    --kli-primary: #0066FF;
-    /* Electric Blue - Primary actions */
-    --kli-primary-light: #3385FF;
-    --kli-primary-dark: #0052CC;
+:root {
+  /* Vibrant Primary Palette */
+  --color-primary: #0066FF;
+  --color-primary-light: #3385FF;
+  --color-cyan: #00D4FF;
+  --color-teal: #00F5A0;
 
-    /* Secondary Accents */
-    --kli-accent-cyan: #00D4FF;
-    /* Data/Analytics highlights */
-    --kli-accent-emerald: #10B981;
-    /* Success states */
-    --kli-accent-amber: #F59E0B;
-    /* Warnings */
-    --kli-accent-rose: #F43F5E;
-    /* Errors/Alerts */
+  /* Accent Colors */
+  --color-purple: #8B5CF6;
+  --color-pink: #D946EF;
+  --color-orange: #F97316;
+  --color-rose: #F43F5E;
 
-    /* Neutral Backgrounds */
-    --kli-bg-primary: #0A0F1E;
-    /* Deep navy - main background */
-    --kli-bg-secondary: #111827;
-    /* Slightly lighter - cards */
-    --kli-bg-tertiary: #1F2937;
-    /* Card hover, inputs */
-    --kli-bg-elevated: #374151;
-    /* Elevated elements */
+  /* Success/Status */
+  --color-emerald: #10B981;
+  --color-amber: #F59E0B;
 
-    /* Text Colors */
-    --kli-text-primary: #F9FAFB;
-    /* Primary text */
-    --kli-text-secondary: #9CA3AF;
-    /* Secondary text */
-    --kli-text-muted: #6B7280;
-    /* Muted/placeholder */
+  /* Backgrounds */
+  --bg-primary: #060912;
+  --bg-secondary: #0D1321;
+  --bg-card: #111827;
 
-    /* Borders & Dividers */
-    --kli-border: #374151;
-    --kli-border-light: #4B5563;
-
-    /* Gradients */
-    --kli-gradient-primary: linear-gradient(135deg, #0066FF 0%, #00D4FF 100%);
-    --kli-gradient-success: linear-gradient(135deg, #10B981 0%, #34D399 100%);
-    --kli-gradient-card: linear-gradient(180deg, rgba(17, 24, 39, 0.8) 0%, rgba(31, 41, 55, 0.4) 100%);
-
-    /* Shadcn Mappings */
-    --background: var(--kli-bg-primary);
-    --foreground: var(--kli-text-primary);
-
-    --card: var(--kli-bg-secondary);
-    --card-foreground: var(--kli-text-primary);
-
-    --popover: var(--kli-bg-secondary);
-    --popover-foreground: var(--kli-text-primary);
-
-    --primary: var(--kli-primary);
-    --primary-foreground: #FFFFFF;
-
-    --secondary: var(--kli-bg-elevated);
-    --secondary-foreground: var(--kli-text-primary);
-
-    --muted: var(--kli-bg-tertiary);
-    --muted-foreground: var(--kli-text-muted);
-
-    --accent: var(--kli-bg-tertiary);
-    --accent-foreground: var(--kli-text-primary);
-
-    --destructive: var(--kli-accent-rose);
-    --destructive-foreground: #FFFFFF;
-
-    --border: var(--kli-border);
-    --input: var(--kli-bg-tertiary);
-    --ring: var(--kli-primary);
-
-    --radius: 0.75rem;
-  }
-
-  .dark {
-    --background: var(--kli-bg-primary);
-    --foreground: var(--kli-text-primary);
-    /* ... reuse root variables as they are already dark mode friendly */
-  }
+  /* Text */
+  --text-primary: #F9FAFB;
+  --text-secondary: #9CA3AF;
+  --text-muted: #6B7280;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
 
-  body {
-    @apply bg-background text-foreground;
-  }
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-cyan);
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid var(--color-cyan);
+  outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+  background: var(--color-primary);
+  color: white;
 }
