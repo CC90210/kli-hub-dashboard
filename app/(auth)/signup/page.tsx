@@ -5,47 +5,78 @@ import { useRouter } from "next/navigation"
 import { signIn } from "next-auth/react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Loader2, Mail, Lock, User, Sparkles, Eye, EyeOff, ArrowRight, Check } from "lucide-react"
+import {
+    Loader2,
+    Mail,
+    Lock,
+    User,
+    Sparkles,
+    Eye,
+    EyeOff,
+    ArrowRight,
+    Check,
+    AlertCircle
+} from "lucide-react"
 
 export default function SignUpPage() {
     const router = useRouter()
+
+    // Form state
     const [name, setName] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
     const [showPassword, setShowPassword] = useState(false)
-    const [error, setError] = useState("")
-    const [loading, setLoading] = useState(false)
 
-    const passwordRequirements = [
-        { text: "At least 8 characters", met: password.length >= 8 },
-        { text: "Contains a number", met: /\d/.test(password) },
-        { text: "Passwords match", met: password === confirmPassword && password.length > 0 }
+    // UI state
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState("")
+
+    // Password validation
+    const passwordChecks = [
+        { label: "At least 8 characters", valid: password.length >= 8 },
+        { label: "Passwords match", valid: password === confirmPassword && confirmPassword.length > 0 }
     ]
+
+    const allChecksValid = passwordChecks.every(check => check.valid)
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
         setError("")
 
-        // Validate
-        if (password !== confirmPassword) {
-            setError("Passwords do not match")
+        // Validation
+        if (!name.trim()) {
+            setError("Please enter your name")
             return
         }
 
-        const requirementsMet = passwordRequirements.every(r => r.met)
-        if (!requirementsMet) {
-            setError("Please ensure all password requirements are met")
+        if (!email.trim()) {
+            setError("Please enter your email")
+            return
+        }
+
+        if (password.length < 8) {
+            setError("Password must be at least 8 characters")
+            return
+        }
+
+        if (password !== confirmPassword) {
+            setError("Passwords do not match")
             return
         }
 
         setLoading(true)
 
         try {
+            // Call signup API
             const response = await fetch("/api/auth/signup", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, email, password })
+                body: JSON.stringify({
+                    name: name.trim(),
+                    email: email.trim(),
+                    password
+                })
             })
 
             const data = await response.json()
@@ -56,9 +87,7 @@ export default function SignUpPage() {
                 return
             }
 
-            // Auto-login
-            setLoading(true) // Keep loading state
-
+            // Auto-login logic
             const result = await signIn("credentials", {
                 email: email.toLowerCase().trim(),
                 password,
@@ -75,50 +104,71 @@ export default function SignUpPage() {
             }
 
         } catch (err) {
+            console.error("Signup error:", err)
             setError("Something went wrong. Please try again.")
             setLoading(false)
         }
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#060912] p-4">
-            {/* Background Effects */}
-            <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-r from-[#8B5CF6]/20 to-[#D946EF]/20 rounded-full blur-3xl" />
-                <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-gradient-to-r from-[#0066FF]/15 to-[#00D4FF]/15 rounded-full blur-3xl" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-[#00F5A0]/10 to-[#00D9FF]/10 rounded-full blur-3xl" />
+        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-[#060912]">
+            {/* Animated Background */}
+            <div className="fixed inset-0 pointer-events-none">
+                <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#8B5CF6]/20 rounded-full blur-[128px] animate-pulse" />
+                <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-[#D946EF]/15 rounded-full blur-[128px] animate-pulse" style={{ animationDelay: "1s" }} />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#0066FF]/10 rounded-full blur-[128px]" />
             </div>
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="relative w-full max-w-md"
+                transition={{ duration: 0.5 }}
+                className="relative w-full max-w-md z-10"
             >
-                {/* Logo */}
+                {/* Logo & Header */}
                 <div className="text-center mb-8">
                     <motion.div
                         initial={{ scale: 0, rotate: -180 }}
                         animate={{ scale: 1, rotate: 0 }}
-                        transition={{ type: "spring", duration: 0.8 }}
+                        transition={{ type: "spring", duration: 0.8, delay: 0.1 }}
                         className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-[#8B5CF6] via-[#D946EF] to-[#F97316] mb-4 shadow-2xl shadow-[#8B5CF6]/30"
                     >
                         <Sparkles className="h-10 w-10 text-white" />
                     </motion.div>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
+                    <motion.h1
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="text-3xl font-bold bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent"
+                    >
                         Create Account
-                    </h1>
-                    <p className="text-gray-400 mt-2">Join KLI Hub to get started</p>
+                    </motion.h1>
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                        className="text-gray-400 mt-2"
+                    >
+                        Join KLI Hub to get started
+                    </motion.p>
                 </div>
 
                 {/* Form Card */}
-                <div className="bg-[#0D1321]/90 backdrop-blur-xl rounded-2xl p-8 border border-white/10 shadow-2xl">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="bg-[#0D1321]/90 backdrop-blur-xl rounded-2xl p-8 border border-white/10 shadow-2xl"
+                >
+                    {/* Error Message */}
                     {error && (
                         <motion.div
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm"
+                            className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-start gap-3"
                         >
-                            {error}
+                            <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
+                            <p className="text-red-400 text-sm">{error}</p>
                         </motion.div>
                     )}
 
@@ -134,9 +184,10 @@ export default function SignUpPage() {
                                     type="text"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    required
                                     placeholder="John Smith"
-                                    className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-600 focus:border-[#8B5CF6] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]/20 transition-all"
+                                    required
+                                    disabled={loading}
+                                    className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-600 focus:border-[#8B5CF6] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]/20 transition-all disabled:opacity-50"
                                 />
                             </div>
                         </div>
@@ -144,7 +195,7 @@ export default function SignUpPage() {
                         {/* Email Field */}
                         <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Work Email
+                                Email Address
                             </label>
                             <div className="relative">
                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
@@ -152,9 +203,10 @@ export default function SignUpPage() {
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    required
                                     placeholder="you@company.com"
-                                    className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-600 focus:border-[#8B5CF6] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]/20 transition-all"
+                                    required
+                                    disabled={loading}
+                                    className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-600 focus:border-[#8B5CF6] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]/20 transition-all disabled:opacity-50"
                                 />
                             </div>
                         </div>
@@ -170,9 +222,10 @@ export default function SignUpPage() {
                                     type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    required
                                     placeholder="Create a strong password"
-                                    className="w-full pl-12 pr-12 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-600 focus:border-[#8B5CF6] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]/20 transition-all"
+                                    required
+                                    disabled={loading}
+                                    className="w-full pl-12 pr-12 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-600 focus:border-[#8B5CF6] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]/20 transition-all disabled:opacity-50"
                                 />
                                 <button
                                     type="button"
@@ -195,23 +248,27 @@ export default function SignUpPage() {
                                     type={showPassword ? "text" : "password"}
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
-                                    required
                                     placeholder="Confirm your password"
-                                    className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-600 focus:border-[#8B5CF6] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]/20 transition-all"
+                                    required
+                                    disabled={loading}
+                                    className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-600 focus:border-[#8B5CF6] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]/20 transition-all disabled:opacity-50"
                                 />
                             </div>
                         </div>
 
                         {/* Password Requirements */}
-                        <div className="space-y-2">
-                            {passwordRequirements.map((req, i) => (
-                                <div key={i} className="flex items-center gap-2 text-sm">
-                                    <div className={`h-4 w-4 rounded-full flex items-center justify-center ${req.met ? "bg-emerald-500" : "bg-white/10"
+                        <div className="space-y-2 py-2">
+                            {passwordChecks.map((check, i) => (
+                                <div key={i} className="flex items-center gap-2">
+                                    <div className={`h-5 w-5 rounded-full flex items-center justify-center transition-colors ${check.valid
+                                            ? "bg-emerald-500"
+                                            : "bg-white/10"
                                         }`}>
-                                        {req.met && <Check className="h-3 w-3 text-white" />}
+                                        {check.valid && <Check className="h-3 w-3 text-white" />}
                                     </div>
-                                    <span className={req.met ? "text-emerald-400" : "text-gray-500"}>
-                                        {req.text}
+                                    <span className={`text-sm transition-colors ${check.valid ? "text-emerald-400" : "text-gray-500"
+                                        }`}>
+                                        {check.label}
                                     </span>
                                 </div>
                             ))}
@@ -220,7 +277,7 @@ export default function SignUpPage() {
                         {/* Submit Button */}
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={loading || !allChecksValid}
                             className="w-full py-4 rounded-xl bg-gradient-to-r from-[#8B5CF6] via-[#D946EF] to-[#F97316] text-white font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#8B5CF6]/25"
                         >
                             {loading ? (
@@ -247,7 +304,7 @@ export default function SignUpPage() {
                             Sign in
                         </Link>
                     </p>
-                </div>
+                </motion.div>
             </motion.div>
         </div>
     )
