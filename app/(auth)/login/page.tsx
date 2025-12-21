@@ -92,10 +92,12 @@ export default function LoginPage() {
                         </Button>
                     </form>
                 </CardContent>
-                <CardFooter className="justify-center">
-                    <p className="text-xs text-slate-500">
-                        Demo Access: Any email / any password (if mock enabled) or check db.
-                    </p>
+                <CardFooter className="justify-center flex-col gap-2">
+                    <div className="text-xs text-slate-500 text-center bg-slate-800/50 p-3 rounded-lg border border-slate-700 w-full">
+                        <span className="font-semibold text-blue-400">Demo Access:</span><br />
+                        Email: <code className="text-white">demo@kli.com</code><br />
+                        Password: <code className="text-white">demo123</code>
+                    </div>
                 </CardFooter>
             </Card>
         </div>
