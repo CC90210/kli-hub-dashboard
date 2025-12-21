@@ -47,7 +47,9 @@ function LoginForm() {
             }
 
             // Success - redirect to dashboard
-            window.location.href = "/dashboard"
+            // Success - redirect to dashboard
+            router.refresh()
+            router.push("/dashboard")
 
         } catch (err) {
             setError("Something went wrong. Please try again.")

@@ -32,8 +32,9 @@ export default function SignUpPage() {
             return
         }
 
-        if (password.length < 8) {
-            setError("Password must be at least 8 characters")
+        const requirementsMet = passwordRequirements.every(r => r.met)
+        if (!requirementsMet) {
+            setError("Please ensure all password requirements are met")
             return
         }
 
@@ -203,7 +204,7 @@ export default function SignUpPage() {
                         {/* Submit Button */}
                         <button
                             type="submit"
-                            disabled={loading || !passwordRequirements.every(r => r.met)}
+                            disabled={loading}
                             className="w-full py-4 rounded-xl bg-gradient-to-r from-[#8B5CF6] via-[#D946EF] to-[#F97316] text-white font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#8B5CF6]/25"
                         >
                             {loading ? (
