@@ -80,8 +80,10 @@ export async function POST(req: NextRequest) {
 
     } catch (error: any) {
         console.error("Signup error:", error)
+        // Return specific error for debugging (safe because we are in dev/initial setup phase)
+        const errorMessage = error.code === 'P2002' ? "Email already exists" : error.message
         return NextResponse.json(
-            { error: "Failed to create account. Please try again." },
+            { error: `Database Error: ${errorMessage}` },
             { status: 500 }
         )
     }

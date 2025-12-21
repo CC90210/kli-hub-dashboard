@@ -106,9 +106,9 @@ export default function SignUpPage() {
                 router.push("/dashboard")
             }
 
-        } catch (err) {
+        } catch (err: any) {
             console.error("Signup error:", err)
-            setError("Something went wrong. Please try again.")
+            setError(err.message || "Something went wrong. Please try again.")
             setLoading(false)
         }
     }
