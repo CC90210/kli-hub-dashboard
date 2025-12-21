@@ -74,8 +74,7 @@ export async function POST(req: NextRequest) {
             data: {
                 content: ragResult.response || ragResult.text || "I couldn't process that request.",
                 role: "ASSISTANT",
-                conversationId: conversation.id,
-                sources: ragResult.sources ? JSON.stringify(ragResult.sources) : null
+                sources: ragResult.sources || undefined
             }
         })
 
@@ -84,7 +83,8 @@ export async function POST(req: NextRequest) {
             data: {
                 query: message,
                 response: assistantMessage.content,
-                sources: ragResult.sources ? JSON.stringify(ragResult.sources) : null,
+                // @ts-ignore - Handle potential type mismatch for now
+                sources: ragResult.sources || undefined,
                 responseTime,
                 userId: userId
             }
