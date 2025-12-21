@@ -231,12 +231,13 @@ function LoginForm() {
                     {/* Sign Up Link */}
                     <p className="mt-6 text-center text-gray-400">
                         Don't have an account?{" "}
-                        <Link
-                            href="/signup"
-                            className="text-[#00D4FF] hover:text-[#00F5A0] font-medium transition-colors"
+                        <button
+                            type="button"
+                            onClick={() => router.push("/signup")}
+                            className="text-[#00D4FF] hover:text-[#00F5A0] font-medium transition-colors hover:underline"
                         >
-                            Create one
-                        </Link>
+                            Create New Account
+                        </button>
                     </p>
                 </motion.div>
             </motion.div>
