@@ -2,8 +2,12 @@ import { Providers } from "./providers"
 import "./globals.css"
 
 export const metadata = {
-  title: "KLI Hub",
-  description: "Enterprise Intelligence Platform"
+  title: "KLI Hub | Advanced Intelligence & RAG Platform",
+  description: "Enterprise-grade intelligence hub for retailer, customer, and supplier data optimization using advanced RAG and LLM technologies.",
+  keywords: ["RAG", "Intelligence", "Retail Data", "Supply Chain", "AI Dashboard"],
+  authors: [{ name: "KLI Intelligence Team" }],
+  viewport: "width=device-width, initial-scale=1",
+  themeColor: "#060912",
 }
 
 export default function RootLayout({
