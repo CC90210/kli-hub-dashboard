@@ -83,14 +83,19 @@ export default function IntelligencePage() {
             const data = await response.json()
 
             const assistantMessage: Message = {
-                id: (Date.now() + 1).toString(),
+                id: data.message?.id || (Date.now() + 1).toString(),
                 role: "assistant",
-                content: data.response || "I'm processing your request. The RAG system will be connected soon.",
+                content: data.message?.content || data.response || "I'm processing your request. The RAG system will be connected soon.",
                 timestamp: new Date(),
-                sources: data.sources
+                sources: data.message?.sources || data.sources
             }
 
             setMessages(prev => [...prev, assistantMessage])
+
+            // Update active conversation if new one was created
+            if (data.conversationId && !activeConversation) {
+                setActiveConversation(data.conversationId)
+            }
         } catch (error) {
             const errorMessage: Message = {
                 id: (Date.now() + 1).toString(),
@@ -171,8 +176,8 @@ export default function IntelligencePage() {
                                 key={conv.id}
                                 onClick={() => setActiveConversation(conv.id)}
                                 className={`w-full text-left p-3 rounded-lg mb-1 transition-all ${activeConversation === conv.id
-                                        ? "bg-[#0066FF]/20 border border-[#0066FF]/30"
-                                        : "hover:bg-white/5"
+                                    ? "bg-[#0066FF]/20 border border-[#0066FF]/30"
+                                    : "hover:bg-white/5"
                                     }`}
                             >
                                 <p className="text-sm font-medium text-white truncate">{conv.title}</p>
@@ -317,8 +322,8 @@ export default function IntelligencePage() {
                                     >
                                         {/* Avatar */}
                                         <div className={`flex-shrink-0 h-10 w-10 rounded-xl flex items-center justify-center ${message.role === "user"
-                                                ? "bg-gradient-to-br from-purple-500 to-pink-500"
-                                                : "bg-gradient-to-br from-[#0066FF] to-[#00D4FF]"
+                                            ? "bg-gradient-to-br from-purple-500 to-pink-500"
+                                            : "bg-gradient-to-br from-[#0066FF] to-[#00D4FF]"
                                             }`}>
                                             {message.role === "user" ? (
                                                 <User className="h-5 w-5 text-white" />
@@ -330,8 +335,8 @@ export default function IntelligencePage() {
                                         {/* Message Content */}
                                         <div className={`flex-1 max-w-[80%] ${message.role === "user" ? "text-right" : ""}`}>
                                             <div className={`inline-block p-4 rounded-2xl ${message.role === "user"
-                                                    ? "bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30"
-                                                    : "bg-white/5 border border-white/10"
+                                                ? "bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30"
+                                                : "bg-white/5 border border-white/10"
                                                 }`}>
                                                 <p className="text-white whitespace-pre-wrap">{message.content}</p>
 

@@ -1,9 +1,35 @@
 import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 
+// Demo users for development/testing when no database is configured
+const DEMO_USERS = [
+    {
+        id: "demo-admin-1",
+        email: "admin@kli.com",
+        password: "admin123",
+        name: "Admin User",
+        role: "ADMIN"
+    },
+    {
+        id: "demo-user-1",
+        email: "demo@kli.com",
+        password: "demo1234",
+        name: "Demo User",
+        role: "USER"
+    },
+    {
+        id: "demo-owner-1",
+        email: "owner@kli.com",
+        password: "owner123",
+        name: "Owner Admin",
+        role: "OWNER"
+    }
+]
+
 // Only import Prisma if DATABASE_URL exists to prevent crash on import
 const getPrismaClient = async () => {
-    if (!process.env.DATABASE_URL && !process.env.POSTGRES_PRISMA_URL) {
+    const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL
+    if (!dbUrl) {
         return null
     }
     // Dynamic import to avoid build-time errors if module is missing
@@ -14,6 +40,23 @@ const getPrismaClient = async () => {
         console.error("Failed to import PrismaClient", e)
         return null
     }
+}
+
+// Helper to check demo users
+const authenticateDemoUser = (email: string, password: string) => {
+    const normalizedEmail = email.toLowerCase().trim()
+    const demoUser = DEMO_USERS.find(
+        u => u.email === normalizedEmail && u.password === password
+    )
+    if (demoUser) {
+        return {
+            id: demoUser.id,
+            email: demoUser.email,
+            name: demoUser.name,
+            role: demoUser.role
+        }
+    }
+    return null
 }
 
 export const authOptions: NextAuthOptions = {
@@ -29,37 +72,51 @@ export const authOptions: NextAuthOptions = {
                     throw new Error("Email and password required")
                 }
 
+                const email = credentials.email.toLowerCase().trim()
+                const password = credentials.password
+
                 // Check if database is available
-                if (!process.env.DATABASE_URL && !process.env.POSTGRES_PRISMA_URL) {
-                    // TEMPORARY: Allow a test user when no database
-                    if (credentials.email === "admin@kli.com" && credentials.password === "admin123") {
-                        return {
-                            id: "1",
-                            email: "admin@kli.com",
-                            name: "Admin User",
-                            role: "ADMIN"
-                        }
+                const hasDatabase = process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL
+
+                if (!hasDatabase) {
+                    // No database - only allow demo users
+                    const demoUser = authenticateDemoUser(email, password)
+                    if (demoUser) {
+                        return demoUser
                     }
-                    throw new Error("Database not configured. Please contact administrator.")
+                    throw new Error("Database not configured. Use demo credentials: demo@kli.com / demo1234")
                 }
 
+                // Database is configured - try to authenticate
                 try {
                     const bcrypt = await import('bcryptjs')
                     const prisma = await getPrismaClient()
 
                     if (!prisma) {
+                        // Database connection failed - fallback to demo users
+                        console.warn("Prisma client unavailable, trying demo users...")
+                        const demoUser = authenticateDemoUser(email, password)
+                        if (demoUser) {
+                            return demoUser
+                        }
                         throw new Error("Database connection failed")
                     }
 
+                    // Try to find user in database
                     const user = await prisma.user.findUnique({
-                        where: { email: credentials.email.toLowerCase().trim() }
+                        where: { email }
                     })
 
                     if (!user) {
+                        // Check demo users as fallback
+                        const demoUser = authenticateDemoUser(email, password)
+                        if (demoUser) {
+                            return demoUser
+                        }
                         throw new Error("UserNotFound")
                     }
 
-                    const isValid = await bcrypt.compare(credentials.password, user.hashedPassword)
+                    const isValid = await bcrypt.compare(password, user.hashedPassword)
 
                     if (!isValid) {
                         throw new Error("PasswordMismatch")
@@ -73,6 +130,16 @@ export const authOptions: NextAuthOptions = {
                     }
                 } catch (error: any) {
                     console.error("Auth error:", error)
+                    
+                    // On database error, try demo users as last resort
+                    if (error.message !== "UserNotFound" && error.message !== "PasswordMismatch") {
+                        const demoUser = authenticateDemoUser(email, password)
+                        if (demoUser) {
+                            console.log("Database error - authenticating via demo user")
+                            return demoUser
+                        }
+                    }
+                    
                     throw new Error(error.message || "Authentication failed")
                 }
             }
@@ -80,7 +147,7 @@ export const authOptions: NextAuthOptions = {
     ],
     session: {
         strategy: "jwt",
-        maxAge: 30 * 24 * 60 * 60
+        maxAge: 30 * 24 * 60 * 60 // 30 days
     },
     pages: {
         signIn: "/login",

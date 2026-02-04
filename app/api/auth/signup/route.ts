@@ -3,9 +3,17 @@ import { NextRequest, NextResponse } from "next/server"
 export async function POST(req: NextRequest) {
     try {
         // Check if database is configured
-        if (!process.env.DATABASE_URL && !process.env.POSTGRES_PRISMA_URL) {
+        const hasDatabase = process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL
+
+        if (!hasDatabase) {
             return NextResponse.json(
-                { error: "Database not configured. Please contact administrator." },
+                {
+                    error: "Database not configured for new signups. Please use demo credentials to sign in.",
+                    demoCredentials: {
+                        email: "demo@kli.com",
+                        password: "demo1234"
+                    }
+                },
                 { status: 503 }
             )
         }
@@ -38,7 +46,13 @@ export async function POST(req: NextRequest) {
         } catch (e) {
             console.error("Prisma import failed", e);
             return NextResponse.json(
-                { error: "Database client missing" },
+                {
+                    error: "Database client unavailable. Please use demo credentials.",
+                    demoCredentials: {
+                        email: "demo@kli.com",
+                        password: "demo1234"
+                    }
+                },
                 { status: 500 }
             )
         }
@@ -80,11 +94,36 @@ export async function POST(req: NextRequest) {
 
     } catch (error: any) {
         console.error("Signup error:", error)
-        // Return specific error for debugging (safe because we are in dev/initial setup phase)
-        const errorMessage = error.code === 'P2002' ? "Email already exists" : error.message
+
+        // Provide specific error messages
+        if (error.code === 'P2002') {
+            return NextResponse.json(
+                { error: "Email already exists" },
+                { status: 400 }
+            )
+        }
+
+        // Database connection errors
+        if (error.code === 'P1001' || error.code === 'P1002') {
+            return NextResponse.json(
+                {
+                    error: "Cannot connect to database. Please use demo credentials.",
+                    demoCredentials: {
+                        email: "demo@kli.com",
+                        password: "demo1234"
+                    }
+                },
+                { status: 503 }
+            )
+        }
+
         return NextResponse.json(
-            { error: `Database Error: ${errorMessage}` },
+            {
+                error: "Signup failed. Please try again or use demo credentials.",
+                details: process.env.NODE_ENV === "development" ? error.message : undefined
+            },
             { status: 500 }
         )
     }
 }
+
